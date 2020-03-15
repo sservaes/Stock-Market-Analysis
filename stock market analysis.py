@@ -109,7 +109,7 @@ mask = np.zeros_like(corr)
 mask[np.triu_indices_from(mask)] = True
 sns.heatmap(corr, annot = True, mask = mask)
 
-# %% correlation plot for closing prices
+# %% correlation plot for closing prices 
 
 corr = closing_df.corr()
 mask = np.zeros_like(corr)
