@@ -94,3 +94,26 @@ returns_fig = sns.PairGrid(tech_rets.dropna())
 returns_fig.map_upper(plt.scatter, color = 'green')
 returns_fig.map_lower(sns.kdeplot, cmap = 'cool_d')
 returns_fig.map_diag(plt.hist, bins = 30)
+
+# %% pairplots of closing prices
+
+returns_fig = sns.PairGrid(closing_df.dropna())
+returns_fig.map_upper(plt.scatter, color = 'green')
+returns_fig.map_lower(sns.kdeplot, cmap = 'cool_d')
+returns_fig.map_diag(plt.hist, bins = 30)
+
+# %% correlation plot for daily returns
+
+corr = tech_rets.corr()
+mask = np.zeros_like(corr)
+mask[np.triu_indices_from(mask)] = True
+sns.heatmap(corr, annot = True, mask = mask)
+
+# %% correlation plot for closing prices
+
+corr = closing_df.corr()
+mask = np.zeros_like(corr)
+mask[np.triu_indices_from(mask)] = True
+sns.heatmap(corr, annot = True, mask = mask)
+
+# %%
