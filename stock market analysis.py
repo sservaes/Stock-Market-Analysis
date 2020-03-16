@@ -109,11 +109,27 @@ mask = np.zeros_like(corr)
 mask[np.triu_indices_from(mask)] = True
 sns.heatmap(corr, annot = True, mask = mask)
 
-# %% correlation plot for closing prices 
+# %% correlation plot for closing prices
 
 corr = closing_df.corr()
 mask = np.zeros_like(corr)
 mask[np.triu_indices_from(mask)] = True
 sns.heatmap(corr, annot = True, mask = mask)
 
-# %%
+# %% scatterplot risk vs expected return
+
+rets = tech_rets.dropna()
+area = np.pi*10
+
+plt.figure(figsize = (20,4))
+plt.scatter(rets.mean(), rets.std(), s = 20)
+plt.xlabel('Expected Return')
+plt.ylabel('Risk')
+
+for label, x, y in zip(rets.columns, rets.mean(), rets.std()):
+    plt.annotate(
+        label,
+        xy = (x, y), xytext = (50, 50),
+        textcoords = 'offset points', ha = 'right', va = 'bottom',
+        arrowprops = dict(connectionstyle = 'arc3, rad = -0.3', arrowstyle = 'simple')
+    )
