@@ -27,6 +27,8 @@ start = datetime(end.year-1, end.month, end.day)
 for stock in tech_list:
     globals()[stock]= DataReader(stock, 'yahoo', start, end)
 
+AAPL.head()
+
 AAPL.describe()
 
 AAPL.info()
@@ -57,7 +59,7 @@ AAPL["Daily Return"].plot(figsize = (20,4), legend = True, linestyle = "--", mar
 
 # %% Give a distribution plot of the Daily Return
 
-fig = plt.figure(figsize = (20,4))
+plt.figure(figsize = (20,4))
 sns.distplot(AAPL["Daily Return"].dropna(), bins = 100, color = 'blue')
 
 # %% Alternative way for making a distribution plot
@@ -133,3 +135,72 @@ for label, x, y in zip(rets.columns, rets.mean(), rets.std()):
         textcoords = 'offset points', ha = 'right', va = 'bottom',
         arrowprops = dict(connectionstyle = 'arc3, rad = -0.3', arrowstyle = 'simple')
     )
+
+# %% histogram of AAPL Daily Return
+
+plt.figure(figsize = (20,4))
+sns.distplot(AAPL['Daily Return'].dropna(), bins = 100, color = 'red')
+
+# %% return the head of rets
+
+rets.head()
+
+# %% return the 0.05 quantile
+
+print(rets['AAPL'].quantile(0.05))
+
+# %% create monte carlo function
+
+days = 365
+dt = 1/days
+mu = rets.mean()['AAPL']
+sigma = rets.std()['AAPL']
+
+def stock_monte_carlo(start_price, days, mu, sigma):
+    price = np.zeros(days)
+    price[0] = start_price
+
+    shock = np.zeros(days)
+    drift = np.zeros(days)
+
+    for x in range(1, days):
+        shock[x] = np.random.normal(loc = mu * dt, scale = sigma * np.sqrt(dt))
+        drift[x] = mu * dt
+        price[x] = price[x-1] + (price[x-1] * (drift[x] + shock[x]))
+
+    return price
+
+# %% test simulation
+
+AAPL.head()
+
+start_price = 320
+
+plt.figure(figsize = (20,8))
+
+for run in range(100):
+    plt.plot(stock_monte_carlo(start_price, days, mu, sigma))
+
+plt.xlabel('Days')
+plt.ylabel('Price')
+plt.title('Monte Carlo Analysis for Apple')
+
+# %%
+
+runs = 10000
+simulations = np.zeros(runs)
+
+for run in range(runs):
+    simulations[run] = stock_monte_carlo(start_price, days, mu, sigma)[days-1]
+
+# %%
+q = np.percentile(simulations, 1)
+
+plt.figure(figsize = (20,4))
+plt.hist(simulations, bins = 200)
+plt.figtext(0.6, 0.8, s = "Start price: $%.2f" %start_price)
+plt.figtext(0.6, 0.7, s = "Mean final price: $%.2f" %simulations.mean())
+plt.figtext(0.6, 0.6, "VaR(0.99): $%.2f" %(start_price-q,))
+plt.figtext(0.15, 0.6, "q(0.99): $%.2f" % q)
+plt.axvline(x = q, linewidth = 4, color = 'r')
+plt.title("Final price distribution for Apple Stock after %s days" %days, weight = 'bold')
